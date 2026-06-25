@@ -1,0 +1,13 @@
+{
+  "appId": "com.sheckless.counter",
+  "appName": "Sheckless Counter",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
