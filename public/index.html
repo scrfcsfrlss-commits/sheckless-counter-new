@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sheckless Counter</title>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#10B981" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sheckless" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #10B981;
+      --green-dark: #059669;
+      --red: #EF4444;
+      --blue: #3B82F6;
+      --yellow: #F59E0B;
+      --purple: #8B5CF6;
+
+      --bg: #F1F5F9;
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --text-subtle: #94A3B8;
+      --card-bg: #FFFFFF;
+      --card-border: #E2E8F0;
+      --input-bg: #F8FAFC;
+      --input-border: #E2E8F0;
+      --tab-active: #10B981;
+      --tab-inactive: #64748B;
+      --chip-bg: #F1F5F9;
+      --chip-border: #E2E8F0;
+      --chip-text: #374151;
+      --badge-bg: rgba(16,185,129,0.12);
+      --badge-text: #059669;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0F172A;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-subtle: #475569;
+      --card-bg: #1E293B;
+      --card-border: #334155;
+      --input-bg: #0F172A;
+      --input-border: #334155;
+      --tab-inactive: #94A3B8;
+      --chip-bg: #1E293B;
+      --chip-border: #334155;
+      --chip-text: #CBD5E1;
+      --badge-bg: rgba(16,185,129,0.15);
+      --badge-text: #34D399;
+    }
+
+    /* ─── PAGE SHELL ─── */
+    html {
+      height: 100%;
+      background: #CBD5E1;
+    }
+
+    [data-theme="dark"] html,
+    html[data-theme="dark"] {
+      background: #020617;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      max-width: 430px;
+      margin: 0 auto;
+      box-shadow: 0 0 40px rgba(0,0,0,0.15);
+      transition: background 0.3s, color 0.3s;
+      overflow: hidden;
+    }
+
+    /* ─── STATUS BAR ─── */
+    .status-bar {
+      background: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: env(safe-area-inset-top, 6px) 16px 5px;
+      padding-top: max(env(safe-area-inset-top), 6px);
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .status-time { font-size: 13px; font-weight: 800; }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+    }
+
+    /* ─── APP HEADER ─── */
+    .app-header {
+      background: var(--green);
+      padding: 8px 14px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .app-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .app-avatar {
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 900;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .app-title {
+      color: white;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      line-height: 1.1;
+    }
+
+    .app-subtitle {
+      color: rgba(255,255,255,0.75);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 6px; }
+
+    .header-btn {
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .header-btn:active { background: rgba(255,255,255,0.3); }
+
+    .badge-dot {
+      width: 5px;
+      height: 5px;
+      background: #86EFAC;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ─── TABS ─── */
+    .tabs {
+      background: var(--card-bg);
+      display: flex;
+      border-bottom: 1px solid var(--card-border);
+      flex-shrink: 0;
+      transition: background 0.3s;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 11px 6px 9px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--tab-inactive);
+      font-family: 'Inter', sans-serif;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      background: transparent;
+    }
+
+    .tab.active { color: var(--green); border-bottom-color: var(--green); }
+    .tab-icon { font-size: 15px; }
+
+    /* ─── SCROLLABLE BODY ─── */
+    .app-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: var(--bg);
+      transition: background 0.3s;
+      scrollbar-width: none;
+    }
+    .app-body::-webkit-scrollbar { display: none; }
+
+    /* ─── TRACKER ─── */
+    .tracker-content { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+
+    /* ─── TOTAL CARD ─── */
+    .total-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      transition: background 0.3s;
+    }
+
+    /* Condition stepper row */
+    .cond-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .step-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1.5px solid var(--chip-border);
+      background: var(--chip-bg);
+      color: var(--text-muted);
+      font-size: 18px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .step-btn:active {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+      transform: scale(0.92);
+    }
+
+    .cond-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2px 20px;
+      min-width: 100px;
+    }
+
+    .cond-label {
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .cond-value {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--green);
+      font-family: monospace;
+    }
+
+    /* Three metric rows */
+    .metric-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+    }
+
+    .metric-row + .metric-row {
+      border-top: 1px solid var(--card-border);
+    }
+
+    .metric-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .metric-label-raw   { color: var(--text-muted); }
+    .metric-label-real  { color: var(--green); }
+    .metric-label-deal  { color: var(--purple); }
+
+    .metric-value {
+      font-size: 38px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .metric-value-raw  { color: var(--text); }
+    .metric-value-real { color: var(--green); }
+    .metric-value-deal { color: var(--purple); }
+
+    .metric-sub {
+      margin-top: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-subtle);
+    }
+
+    /* Count row */
+    .count-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--card-border);
+      margin-top: 4px;
+    }
+
+    .count-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+    }
+
+    .count-value {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      font-family: monospace;
+    }
+
+    /* ─── INPUT CARD ─── */
+    .input-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px;
+      transition: background 0.3s;
+    }
+
+    .input-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .input-card-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .cond-badge {
+      background: var(--badge-bg);
+      color: var(--green);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* Amount display */
+    .amount-display {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 28px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      border-radius: 12px;
+      color: var(--text);
+      margin-bottom: 10px;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, background 0.3s;
+      user-select: none;
+    }
+
+    .amount-display.has-value { border-color: var(--green); }
+
+    .amount-display-placeholder {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-subtle);
+    }
+
+    .amount-display-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 28px;
+      background: var(--green);
+      border-radius: 1px;
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* Quick chips */
+    .quick-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .quick-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-subtle);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .quick-chip {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--chip-border);
+      background: var(--chip-bg);
+      color: var(--chip-text);
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quick-chip:active {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--badge-bg);
+    }
+
+    /* Keypad */
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .key {
+      padding: 0;
+      height: 52px;
+      border: 1px solid var(--chip-border);
+      border-radius: 12px;
+      background: var(--chip-bg);
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .key:active, .key.pressed {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+      transform: scale(0.93);
+    }
+
+    .key-back {
+      background: rgba(239,68,68,0.08);
+      border-color: rgba(239,68,68,0.2);
+      color: var(--red);
+      font-size: 18px;
+    }
+
+    .key-back:active, .key-back.pressed {
+      background: var(--red);
+      color: white;
+      border-color: var(--red);
+    }
+
+    /* Action buttons */
+    .action-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-input {
+      background: var(--chip-bg);
+      color: var(--text-muted);
+      border: 1.5px solid var(--card-border);
+      flex: 2;
+    }
+
+    .btn-input.has-value {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+
+    .btn-reset {
+      background: var(--red);
+      color: white;
+      flex: 1;
+    }
+
+    /* ─── HISTORY ─── */
+    .history-content { padding: 14px; }
+
+    .history-empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-subtle);
+    }
+
+    .history-empty-icon { font-size: 40px; margin-bottom: 10px; }
+    .history-empty-title { font-size: 14px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+    .history-empty-sub { font-size: 12px; }
+
+    .history-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: slide-in 0.25s ease;
+      transition: background 0.3s;
+    }
+
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .history-item-left { display: flex; flex-direction: column; gap: 2px; }
+    .history-item-amount { font-size: 15px; font-weight: 800; color: var(--green); }
+    .history-item-time { font-size: 10px; color: var(--text-subtle); }
+    .history-item-index { font-size: 11px; font-weight: 700; color: var(--text-subtle); font-family: monospace; }
+
+    /* ─── GUIDE ─── */
+    .guide-content { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+    .guide-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      transition: background 0.3s;
+    }
+
+    .guide-card-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .guide-card-body { font-size: 11px; color: var(--text-muted); line-height: 1.7; }
+
+    /* ─── FOOTER ─── */
+    .app-footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--card-border);
+      padding: 8px 14px;
+      padding-bottom: max(env(safe-area-inset-bottom), 8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .footer-item {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-subtle);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .footer-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-green  { background: #10B981; }
+    .dot-orange { background: #F59E0B; }
+
+    /* ─── SNACKBAR ─── */
+    .snackbar {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      color: white;
+      z-index: 9999;
+      opacity: 0;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      pointer-events: none;
+      max-width: 90vw;
+      text-align: center;
+      white-space: normal;
+    }
+
+    .snackbar.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .snackbar.green { background: #10B981; }
+    .snackbar.red   { background: #EF4444; }
+
+    /* ─── DIALOG ─── */
+    .dialog-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dialog-overlay.open { display: flex; }
+
+    .dialog {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 24px 20px 16px;
+      width: 300px;
+      max-width: 90vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      transition: background 0.3s;
+    }
+
+    .dialog-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--text); }
+    .dialog-body  { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+    .dialog-btn {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      background: transparent;
+      transition: background 0.15s;
+    }
+
+    .dialog-btn-cancel { color: var(--green); }
+    .dialog-btn-cancel:hover { background: var(--badge-bg); }
+    .dialog-btn-reset { color: var(--red); }
+    .dialog-btn-reset:hover { background: rgba(239,68,68,0.08); }
+  </style>
+</head>
+<body>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="status-time" id="statusTime">00:00</span>
+    <div class="status-icons">
+      <span>📶</span>
+      <span>🛜</span>
+      <span id="batteryText">100%</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <!-- APP HEADER -->
+  <div class="app-header">
+    <div class="app-header-left">
+      <div class="app-avatar">SC</div>
+      <div>
+        <div class="app-title">COUNTER</div>
+        <div class="app-subtitle">Sheckless Counter</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn" onclick="toggleDark()" id="darkToggle">🌙 Dark</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('tracker', this)">
+      <span class="tab-icon">⊕</span> Tracker
+    </button>
+    <button class="tab" onclick="switchTab('history', this)">
+      <span class="tab-icon">🕐</span> History
+    </button>
+    <button class="tab" onclick="switchTab('guide', this)">
+      <span class="tab-icon">❓</span> Guide
+    </button>
+  </div>
+
+  <!-- SCROLLABLE CONTENT -->
+  <div class="app-body">
+
+    <!-- ── TRACKER TAB ── -->
+    <div id="tab-tracker" class="tracker-content">
+
+      <!-- TOTAL CARD -->
+      <div class="total-card">
+
+        <!-- Condition stepper -->
+        <div class="cond-row">
+          <button class="step-btn"
+            onmousedown="startStep(-1)" onmouseup="stopStep()" onmouseleave="stopStep()"
+            ontouchstart="startStep(-1)" ontouchend="stopStep()">▼</button>
+          <div class="cond-box">
+            <div class="cond-label">Condition ×</div>
+            <div class="cond-value" id="condDisplay">1.00</div>
+          </div>
+          <button class="step-btn"
+            onmousedown="startStep(1)" onmouseup="stopStep()" onmouseleave="stopStep()"
+            ontouchstart="startStep(1)" ontouchend="stopStep()">▲</button>
+        </div>
+
+        <!-- Metric 1: Total Amount (raw input sum) -->
+        <div class="metric-row">
+          <div class="metric-label metric-label-raw">Total Amount</div>
+          <div class="metric-value metric-value-raw" id="totalDisplay">€0</div>
+          <div class="metric-sub">Sum of all inputs</div>
+        </div>
+
+        <!-- Metric 2: Total Real Amount (raw ÷ condition) -->
+        <div class="metric-row">
+          <div class="metric-label metric-label-real">Total Real Amount</div>
+          <div class="metric-value metric-value-real" id="realDisplay">€0</div>
+          <div class="metric-sub" id="realSub">Total ÷ 1.00</div>
+        </div>
+
+        <!-- Metric 3: Daily Deal (raw × 2) -->
+        <div class="metric-row">
+          <div class="metric-label metric-label-deal">Amount Daily Deal</div>
+          <div class="metric-value metric-value-deal" id="dealDisplay">€0</div>
+          <div class="metric-sub">Total × 2</div>
+        </div>
+
+        <!-- Transaction count -->
+        <div class="count-row">
+          <div class="count-label">Transactions</div>
+          <div class="count-value" id="countDisplay">0</div>
+        </div>
+      </div>
+
+      <!-- INPUT CARD -->
+      <div class="input-card">
+        <div class="input-card-header">
+          <div class="input-card-label">Numeric Entry Field</div>
+          <div class="cond-badge" id="condBadge">×1.00</div>
+        </div>
+
+        <!-- Amount display -->
+        <div class="amount-display" id="amountDisplay">
+          <span class="amount-display-placeholder" id="amountPlaceholder">Amount</span>
+          <span id="amountText" style="display:none;"></span>
+          <span class="amount-display-cursor" id="amountCursor" style="display:none;"></span>
+        </div>
+
+        <!-- Quick chips -->
+        <div class="quick-row">
+          <span class="quick-label">Quick:</span>
+          <button class="quick-chip" onclick="setQuick('1')">1</button>
+          <button class="quick-chip" onclick="setQuick('10')">10</button>
+          <button class="quick-chip" onclick="setQuick('50')">50</button>
+          <button class="quick-chip" onclick="setQuick('100')">100</button>
+          <button class="quick-chip" onclick="setQuick('500')">500</button>
+        </div>
+
+        <!-- Keypad -->
+        <div class="keypad">
+          <button class="key" onclick="keyPress('1')">1</button>
+          <button class="key" onclick="keyPress('2')">2</button>
+          <button class="key" onclick="keyPress('3')">3</button>
+          <button class="key" onclick="keyPress('4')">4</button>
+          <button class="key" onclick="keyPress('5')">5</button>
+          <button class="key" onclick="keyPress('6')">6</button>
+          <button class="key" onclick="keyPress('7')">7</button>
+          <button class="key" onclick="keyPress('8')">8</button>
+          <button class="key" onclick="keyPress('9')">9</button>
+          <button class="key" onclick="keyPress('.')">.</button>
+          <button class="key" onclick="keyPress('0')">0</button>
+          <button class="key key-back" onclick="keyBack()">⌫</button>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-row">
+          <button class="btn btn-input" id="inputBtn" onclick="handleInput()">⊕ INPUT</button>
+          <button class="btn btn-reset" onclick="showReset()">RESET</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HISTORY TAB ── -->
+    <div id="tab-history" class="history-content" style="display:none;">
+      <div id="historyList"></div>
+      <div id="historyEmpty" class="history-empty">
+        <div class="history-empty-icon">📋</div>
+        <div class="history-empty-title">No Transactions Yet</div>
+        <div class="history-empty-sub">Your transaction history will appear here.</div>
+      </div>
+    </div>
+
+    <!-- ── GUIDE TAB ── -->
+    <div id="tab-guide" class="guide-content" style="display:none;">
+      <div class="guide-card">
+        <div class="guide-card-title">📝 How to Use</div>
+        <div class="guide-card-body">Enter a numeric amount using the keypad and tap INPUT to log it. The Total Amount shows your raw running sum. The condition rate (▼/▲) adjusts the Real Amount display.</div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-card-title">📊 Three Totals</div>
+        <div class="guide-card-body">
+          <strong>Total Amount</strong> — raw sum of everything you inputted.<br><br>
+          <strong>Total Real Amount</strong> — total ÷ condition rate (e.g. if you entered 90 and condition is 0.90, the real value is 100).<br><br>
+          <strong>Amount Daily Deal</strong> — total × 2.
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-card-title">🎛️ Condition Rate</div>
+        <div class="guide-card-body">Tap ▼ or ▲ to adjust the condition rate in 0.01 steps. Hold the button to change rapidly. Use arrow keys on desktop.</div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-card-title">⚡ Quick Input</div>
+        <div class="guide-card-body">Tap the Quick chips (1, 10, 50, 100, 500) to fill the input instantly, then press INPUT to confirm.</div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-card-title">💾 Data Storage</div>
+        <div class="guide-card-body">All data is saved locally on your device. Nothing leaves your phone. Data persists between sessions automatically.</div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-card-title">📲 Install as App</div>
+        <div class="guide-card-body">On Android: tap ⋮ menu → Add to Home Screen. On iPhone: tap Share → Add to Home Screen. Works fully offline once installed.</div>
+      </div>
+    </div>
+
+  </div><!-- /app-body -->
+
+  <!-- FOOTER -->
+  <div class="app-footer">
+    <div class="footer-item">
+      <span class="footer-dot dot-green"></span>
+      Offline · LocalStorage
+    </div>
+    <div class="footer-item">
+      <span class="footer-dot dot-orange"></span>
+      v1.0.0
+    </div>
+  </div>
+
+  <!-- SNACKBAR -->
+  <div class="snackbar" id="snackbar"></div>
+
+  <!-- RESET DIALOG -->
+  <div class="dialog-overlay" id="resetDialog">
+    <div class="dialog">
+      <div class="dialog-title">Reset Counter</div>
+      <div class="dialog-body">Are you sure you want to reset all data? This will clear your total and transaction history.</div>
+      <div class="dialog-actions">
+        <button class="dialog-btn dialog-btn-cancel" onclick="closeReset()">Cancel</button>
+        <button class="dialog-btn dialog-btn-reset" onclick="confirmReset()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── STATE ───
+    let rawTotal = 0;
+    let count = 0;
+    let history = [];
+    let snackTimer = null;
+    let stepTimer = null;
+    let stepInterval = null;
+    let keypadValue = '';
+    let multiplier = 1.0;
+
+    // ─── INIT ───
+    (function init() {
+      const t = localStorage.getItem('sc_raw');
+      const c = localStorage.getItem('sc_count');
+      const h = localStorage.getItem('sc_history');
+      const m = localStorage.getItem('sc_mult');
+      if (t) rawTotal = parseFloat(t);
+      if (c) count = parseInt(c, 10);
+      if (h) history = JSON.parse(h);
+      if (m) multiplier = parseFloat(m);
+      const dark = localStorage.getItem('sc_dark');
+      if (dark === '1') applyDark(true);
+      updateDisplay();
+      updateHistory();
+      updateTime();
+      setInterval(updateTime, 30000);
+    })();
+
+    // ─── CLOCK ───
+    function updateTime() {
+      const d = new Date();
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      document.getElementById('statusTime').textContent = `${h}:${m}`;
+    }
+
+    // ─── FORMAT ───
+    function fmtNum(n) {
+      if (n === 0) return '0';
+      const abs = Math.abs(n);
+      let s = '', v = n;
+      if (abs >= 1e12) { v = n / 1e12; s = 'T'; }
+      else if (abs >= 1e9)  { v = n / 1e9;  s = 'B'; }
+      else if (abs >= 1e6)  { v = n / 1e6;  s = 'M'; }
+      else if (abs >= 1e3)  { v = n / 1e3;  s = 'K'; }
+      return v.toFixed(4).replace(/0+$/, '').replace(/\.$/, '') + s;
+    }
+    function fmt(val) { return '€' + fmtNum(val); }
+
+    // ─── DISPLAY ───
+    // Total Amount    = rawTotal           (exactly what user inputted)
+    // Total Real Amt  = rawTotal ÷ mult    (grossed up by condition)
+    // Daily Deal      = rawTotal × 2
+    function updateDisplay() {
+      const realAmt = multiplier > 0 ? rawTotal / multiplier : rawTotal;
+      const dealAmt = rawTotal * 2;
+
+      document.getElementById('totalDisplay').textContent = fmt(rawTotal);
+      document.getElementById('realDisplay').textContent  = fmt(realAmt);
+      document.getElementById('dealDisplay').textContent  = fmt(dealAmt);
+      document.getElementById('countDisplay').textContent = count;
+      document.getElementById('condDisplay').textContent  = multiplier.toFixed(2);
+      document.getElementById('condBadge').textContent    = `×${multiplier.toFixed(2)}`;
+      document.getElementById('realSub').textContent      = `Total ÷ ${multiplier.toFixed(2)}`;
+    }
+
+    // ─── MULTIPLIER STEPPER ───
+    function stepMult(dir) {
+      multiplier = Math.round((multiplier + dir * 0.01) * 1000) / 1000;
+      if (multiplier < 0.01) multiplier = 0.01;
+      if (multiplier > 99.99) multiplier = 99.99;
+      localStorage.setItem('sc_mult', multiplier);
+      updateDisplay();
+    }
+
+    function startStep(dir) {
+      stepMult(dir);
+      stepTimer = setTimeout(() => {
+        stepInterval = setInterval(() => stepMult(dir), 80);
+      }, 400);
+    }
+
+    function stopStep() {
+      clearTimeout(stepTimer);
+      clearInterval(stepInterval);
+      stepTimer = null;
+      stepInterval = null;
+    }
+
+    // ─── KEYPAD DISPLAY ───
+    function refreshKeypadDisplay() {
+      const placeholder = document.getElementById('amountPlaceholder');
+      const text        = document.getElementById('amountText');
+      const cursor      = document.getElementById('amountCursor');
+      const display     = document.getElementById('amountDisplay');
+      const btn         = document.getElementById('inputBtn');
+
+      if (keypadValue === '') {
+        placeholder.style.display = '';
+        text.style.display = 'none';
+        cursor.style.display = 'none';
+        display.classList.remove('has-value');
+        btn.classList.remove('has-value');
+      } else {
+        placeholder.style.display = 'none';
+        text.style.display = '';
+        cursor.style.display = '';
+        text.textContent = keypadValue;
+        display.classList.add('has-value');
+        const amt = parseFloat(keypadValue);
+        btn.classList.toggle('has-value', !isNaN(amt) && amt > 0);
+      }
+    }
+
+    // ─── KEYPAD PRESS ───
+    function keyPress(char) {
+      if (char === '.' && keypadValue.includes('.')) return;
+      if (keypadValue === '0' && char !== '.') return;
+      if (keypadValue.length >= 12) return;
+      keypadValue += char;
+      refreshKeypadDisplay();
+      animateKey(char);
+    }
+
+    function keyBack() {
+      if (keypadValue.length === 0) return;
+      keypadValue = keypadValue.slice(0, -1);
+      refreshKeypadDisplay();
+    }
+
+    function animateKey(char) {
+      document.querySelectorAll('.key').forEach(k => {
+        if (k.textContent.trim() === char) {
+          k.classList.add('pressed');
+          setTimeout(() => k.classList.remove('pressed'), 120);
+        }
+      });
+    }
+
+    function setQuick(val) {
+      keypadValue = val;
+      refreshKeypadDisplay();
+    }
+
+    // ─── SUBMIT ───
+    function handleInput() {
+      const amt = parseFloat(keypadValue);
+      if (isNaN(amt) || amt <= 0) {
+        showSnack('Please enter a valid positive amount.', 'red');
+        return;
+      }
+      rawTotal += amt;
+      count += 1;
+      history.unshift({ amount: amt, time: new Date().toISOString(), idx: count });
+      keypadValue = '';
+      refreshKeypadDisplay();
+      save();
+      updateDisplay();
+      updateHistory();
+      const real = fmt(rawTotal / multiplier);
+      showSnack(`+${fmtNum(amt)} added · Real: ${real} · Deal: ${fmt(rawTotal * 2)}`, 'green');
+    }
+
+    // ─── HISTORY ───
+    function updateHistory() {
+      const list  = document.getElementById('historyList');
+      const empty = document.getElementById('historyEmpty');
+      if (history.length === 0) {
+        list.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+      list.innerHTML = history.map(e => {
+        const d = new Date(e.time);
+        const timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        return `<div class="history-item">
+          <div class="history-item-left">
+            <div class="history-item-amount">+${fmtNum(e.amount)}</div>
+            <div class="history-item-time">${timeStr}</div>
+          </div>
+          <div class="history-item-index">#${e.idx}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // ─── RESET ───
+    function showReset()  { document.getElementById('resetDialog').classList.add('open'); }
+    function closeReset() { document.getElementById('resetDialog').classList.remove('open'); }
+    function confirmReset() {
+      closeReset();
+      rawTotal = 0; count = 0; history = [];
+      keypadValue = '';
+      refreshKeypadDisplay();
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      localStorage.clear();
+      if (isDark) localStorage.setItem('sc_dark', '1');
+      localStorage.setItem('sc_mult', multiplier);
+      updateDisplay();
+      updateHistory();
+      showSnack('Counter reset.', 'red');
+    }
+
+    // ─── SAVE ───
+    function save() {
+      localStorage.setItem('sc_raw', rawTotal);
+      localStorage.setItem('sc_count', count);
+      localStorage.setItem('sc_history', JSON.stringify(history));
+      localStorage.setItem('sc_mult', multiplier);
+    }
+
+    // ─── SNACKBAR ───
+    function showSnack(msg, type) {
+      const el = document.getElementById('snackbar');
+      el.textContent = msg;
+      el.className = 'snackbar ' + type + ' show';
+      if (snackTimer) clearTimeout(snackTimer);
+      snackTimer = setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    // ─── TABS ───
+    function switchTab(name, btn) {
+      ['tracker', 'history', 'guide'].forEach(t => {
+        document.getElementById('tab-' + t).style.display = (t === name ? '' : 'none');
+      });
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // ─── DARK MODE ───
+    function toggleDark() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      applyDark(!isDark);
+    }
+
+    function applyDark(dark) {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      document.getElementById('darkToggle').textContent = dark ? '☀️ Light' : '🌙 Dark';
+      localStorage.setItem('sc_dark', dark ? '1' : '0');
+    }
+
+    // ─── KEYBOARD ───
+    document.addEventListener('keydown', e => {
+      if (['0','1','2','3','4','5','6','7','8','9'].includes(e.key)) keyPress(e.key);
+      else if (e.key === '.') keyPress('.');
+      else if (e.key === 'Backspace') keyBack();
+      else if (e.key === 'Enter') handleInput();
+      else if (e.key === 'ArrowUp') stepMult(1);
+      else if (e.key === 'ArrowDown') stepMult(-1);
+    });
+
+    document.getElementById('resetDialog').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeReset();
+    });
+
+    // ─── SERVICE WORKER ───
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(r => console.log('SW registered:', r.scope))
+          .catch(e => console.warn('SW failed:', e));
+      });
+    }
+  </script>
+</body>
+</html>
