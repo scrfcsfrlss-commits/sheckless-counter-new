@@ -1,34 +1,50 @@
 workflows:
   android-release:
-    name: Android Release Build
+    name: Android APK Build
     instance_type: mac_mini
-    max_build_duration: 60
+    max_build_duration: 90
     environment:
       java: openjdk17
       ndk: r21e
       groups:
         - keystore_credentials
     scripts:
-      - name: Install dependencies
+      - name: Install Node dependencies
         script: |
           npm install
+      - name: Install Capacitor tools
+        script: |
           npm install -D @capacitor/core @capacitor/cli @capacitor/android
-      - name: Initialize Capacitor
+      - name: Build web app
         script: |
-          npx cap init "Sheckless Counter" com.sheckless.counter --web-dir public
-      - name: Add Android platform
+          # Create public folder if it doesn't exist
+          mkdir -p public
+      - name: Initialize Capacitor (if needed)
         script: |
-          npx cap add android
+          if [ ! -d "android" ]; then
+            npx cap init "Sheckless Counter" com.sheckless.counter --web-dir public
+          fi
+      - name: Add Android platform (if needed)
+        script: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
       - name: Sync web files
         script: |
           npx cap sync android
-      - name: Build APK
+      - name: Build APK (debug)
         script: |
           cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - name: Build APK (release)
+        script: |
+          cd android
+          chmod +x gradlew
           ./gradlew assembleRelease
     artifacts:
+      - android/app/build/outputs/apk/debug/**/*.apk
       - android/app/build/outputs/apk/release/**/*.apk
-      - android/app/build/outputs/bundle/release/**/*.aab
     publishing:
       email:
         recipients:
