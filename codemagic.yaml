@@ -1,7 +1,6 @@
 workflows:
   android-release:
     name: Android APK Build
-    instance_type: linux
     max_build_duration: 90
     environment:
       java: openjdk17
