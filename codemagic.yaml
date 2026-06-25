@@ -3,10 +3,8 @@ workflows:
     name: Android APK Build
     max_build_duration: 90
     environment:
-      java: openjdk17
+      java: openjdk11
       ndk: r21e
-      groups:
-        - keystore_credentials
     scripts:
       - name: Install Node dependencies
         script: |
